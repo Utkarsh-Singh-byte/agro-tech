@@ -21,17 +21,12 @@ export function ChatInterface({ chatId, onTitleUpdate }: ChatInterfaceProps) {
   const [loading, setLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [geminiApiKey, setGeminiApiKey] = useState('');
   const { user } = useAuth();
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadMessages();
-    const storedKey = localStorage.getItem('gemini_api_key');
-    if (storedKey) {
-      setGeminiApiKey(storedKey);
-    }
   }, [chatId]);
 
   useEffect(() => {
@@ -69,7 +64,7 @@ export function ChatInterface({ chatId, onTitleUpdate }: ChatInterfaceProps) {
   };
 
   const uploadImage = async (file: File): Promise<string> => {
-    const fileName = `${Date.now()}-${file.name}`;
+    const fileName = `${user?.id}/${Date.now()}-${file.name}`;
     const { data, error } = await supabase.storage
       .from('chat-images')
       .upload(fileName, file);
@@ -85,13 +80,6 @@ export function ChatInterface({ chatId, onTitleUpdate }: ChatInterfaceProps) {
 
   const handleSend = async () => {
     if ((!input.trim() && !selectedImage) || !user) return;
-
-    if (!geminiApiKey) {
-      const key = prompt('Please enter your Gemini API key:');
-      if (!key) return;
-      setGeminiApiKey(key);
-      localStorage.setItem('gemini_api_key', key);
-    }
 
     setLoading(true);
     try {
@@ -146,7 +134,6 @@ export function ChatInterface({ chatId, onTitleUpdate }: ChatInterfaceProps) {
           },
           body: JSON.stringify({
             messages: formattedMessages,
-            geminiApiKey: geminiApiKey,
           }),
         }
       );
@@ -181,7 +168,11 @@ export function ChatInterface({ chatId, onTitleUpdate }: ChatInterfaceProps) {
 
     } catch (error) {
       console.error('Error sending message:', error);
-      alert('Failed to send message. Please try again.');
+      if (error instanceof Error && error.message.includes('Bucket not found')) {
+        alert('Image storage not properly configured. Please contact support.');
+      } else {
+        alert('Failed to send message. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
