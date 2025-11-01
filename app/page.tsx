@@ -65,7 +65,6 @@ export default function Home() {
         {currentChatId ? (
           <ChatInterface
             chatId={currentChatId}
-            onTitleUpdate={() => {}}
           />
         ) : (
           <div className="flex-1 flex items-center justify-center text-gray-500">
