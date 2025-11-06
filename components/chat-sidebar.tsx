@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -6,7 +5,7 @@ import { supabase, type Chat } from '@/lib/supabase';
 import { useAuth } from './auth-provider';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
-import { MessageSquarePlus, Sprout, LogOut, Trash2 } from 'lucide-react';
+import { MessageSquarePlus, Sprout, LogOut, Trash2, BarChart3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
@@ -48,20 +47,18 @@ export function ChatSidebar({ currentChatId, onChatSelect, onNewChat, onChatDele
     loadChats();
   };
 
- useEffect(() => {
-  const channel = supabase
-    .channel('chats-changes')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'chats' }, () => {
-      loadChats();
-    })
-    .subscribe();
+  useEffect(() => {
+    const channel = supabase
+      .channel('chats-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'chats' }, () => {
+        loadChats();
+      })
+      .subscribe();
 
-  // cleanup (safe and synchronous)
-  return () => {
-    channel.unsubscribe();
-  };
-}, []);
-
+    return () => {
+      channel.unsubscribe();
+    };
+  }, []);
 
   return (
     <div className="w-72 bg-gradient-to-b from-green-950 via-green-900 to-gray-900 text-white flex flex-col h-full shadow-xl">
@@ -78,7 +75,7 @@ export function ChatSidebar({ currentChatId, onChatSelect, onNewChat, onChatDele
         </div>
       </div>
 
-      {/* New chat */}
+      {/* New Chat */}
       <div className="p-3">
         <Button
           onClick={handleNewChat}
@@ -126,6 +123,19 @@ export function ChatSidebar({ currentChatId, onChatSelect, onNewChat, onChatDele
           ))}
         </div>
       </ScrollArea>
+
+      {/* Comparison of Model Button */}
+      <div className="px-4 mb-3">
+        <a
+          href="https://coruscating-scone-6c051c.netlify.app/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 w-full text-center bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-2 rounded-xl shadow-md transition-all"
+        >
+          <BarChart3 className="w-4 h-4" />
+          <strong>Comparison of Model</strong>
+        </a>
+      </div>
 
       {/* Footer */}
       <div className="p-4 border-t border-green-800 bg-green-950/30">
